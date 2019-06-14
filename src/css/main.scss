@@ -13,5 +13,19 @@
     
     text {
         font-family: "Guardian Text Sans Web";
+        font-size: 14px;
+        font-weight: 300;
+    }
+
+    .x-axis text {
+        transform: rotate(45deg) translateX(15px);
+    }
+
+    .y-axis text {
+        transform: rotate(45deg) translateX(-15px);
+    }
+
+    svg {
+        overflow: visible;
     }
 }
