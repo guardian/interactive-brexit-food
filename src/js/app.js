@@ -122,7 +122,8 @@ d3.csv("<%= path %>/assets/sorted_2.csv").then(data => {
             total: d.total
         })))
         .enter().append("circle")
-            .attr("r", d => rScale(d.total))
+            // .attr("r", d => rScale(d.total))
+            .attr("r", d => 3.5)
             .attr("id", d => d.name)
             .attr("cx", d => d.pos[0])
             .attr("cy", d => d.pos[1])
