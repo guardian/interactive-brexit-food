@@ -27,5 +27,11 @@
 
     svg {
         overflow: visible;
+        circle {
+            transition: fill-opacity 0.33s ease-in-out;
+        }
+        circle:hover {
+            fill-opacity: 0.25 !important;
+        }
     }
 }
