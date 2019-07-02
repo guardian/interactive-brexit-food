@@ -23,119 +23,53 @@ const colourScale = (x) => {
 }
 
 d3Fetch.csv("<%= path %>/assets/sorted_2.csv").then(data => {
-    // console.log(data);
-
-    // console.log(d3Beeswarm)
-    const height = 620;
+    const height = 7000;
     const width = 620;
+    const dataFiltered = data.filter(d => d.include === "y");
 
     const chartHeight = 620;
     const chartWidth = 620;
 
-    // const xScale = d3.scaleLinear().domain([0, 1]).range([0, chartWidth])
-    // const yScale = d3.scaleLinear().domain([0, 1]).range([chartHeight, 0])
+    console.log(d3.min(dataFiltered, d => Number(d.totalUse)))
+    const xScale = d3.scaleLinear().domain([0, 1, 1.0000001]).range([0, 620, 740]).clamp(true);
+    // const rScale = d3.scaleSqrt().domain(d3.extent(dataFiltered, d => Number(d.totalUse))).range([2.5, 40]).clamp(true)
 
-    // const label = d3.select('.interactive-wrapper').append("div")
-    // const svg = d3.select(".interactive-wrapper").append("svg").attr("height", height).attr("width", width).append("g").attr("transform", `translate(${(width-chartWidth)/2},${(height-chartHeight)/2}) rotate(-45,${chartWidth/2},${chartHeight/2})`);
+    const svg = d3.select(".interactive-wrapper").append("svg")
+    .attr("height", height)
+    .attr("width", width)
 
-    // const axisG = svg.append('g');
+    svg.append("g")
+        .call(d3.axisTop(xScale))
 
-    // axisG.append("g").classed("x-axis", true).attr("transform", `translate(0, ${chartHeight})`).call(d3.axisBottom(xScale))
+    svg.selectAll(".circles")
+        .data(dataFiltered)
+        .enter()
+        .append("circle")
+            .attr("cx", d => xScale(Number(d.leftAfterBrexit)))
+            .attr("cy", (d,i) => i*75)
+            .attr("r", d => 35)
+            .style("fill", d => colourScale(Number(d.leftAfterBrexit)))
 
-    // axisG.append("g").classed("y-axis", true).call(d3.axisLeft(yScale));
+    svg.selectAll(".lines")
+        .data(dataFiltered)
+        .enter()
+        .append("line")
+            .attr("x1", 0)
+            .attr("x2", d => xScale(Number(d.leftAfterBrexit)))
+            .attr("y1", (d,i) => i*75)
+            .attr("y2", (d,i) => i*75)
+            .style("stroke", "#dcdcdc")
+            .style("stroke-width", 1)
 
-    // svg.selectAll("circle")
-    //     .data(data.filter(d => d.leftAfterBrexit !== "NA"))
-    //     .enter()
-    //     .append("circle")
-    //     .attr("r", 4) 
-    //     .attr("cx", d => xScale(d.production_perc))
-    //     .attr("cy", d => yScale(d.importNonEU_perc))
-    //     .style("fill", d => colourScale(d.leftAfterBrexit))
-    //     .style("stroke", "#fff")
-    //     .on("mousemove", function(d) {
-    //         label.html(`${d.I}. UK: ${Number(d.production_perc).toFixed(2)}, ROW: ${Number(d.importNonEU_perc).toFixed(2)}, EU: ${Number(d.importEU_perc).toFixed(2)}`);
-    //     });
+    svg.selectAll(".labels")
+        .data(dataFiltered)
+        .enter()
+        .append("text")
+            .attr("x", d => xScale(Number(d.leftAfterBrexit)) + 15)
+            .attr("y", (d,i) => i*75)
+            .text(d => d.I + " / " + d.leftAfterBrexit)
+            .style("fill", d => colourScale(Number(d.leftAfterBrexit)))
 
-    function round(x) { return x%5<3 ? (x%5===0 ? x : Math.floor(x/5)*5) : Math.ceil(x/5)*5 }
-
-    const yScale = d3.scaleLinear().domain([0, 1]).range([0, width]).clamp(true)  
-    var swarm = d3Beeswarm
-    .beeswarm()
-    .data(data.filter(d => d.leftAfterBrexit !== "NA")) // set the data to arrange
-    .distributeOn(function(d) {
-        // set the value accessor to distribute on
-        return (yScale(round(Number(d.leftAfterBrexit)*100)/100)); // evaluated once on each element of data
-    }) // when starting the arrangement
-    .radius(15) // set the radius for overlapping detection
-    .orientation('horizontal') // set the orientation of the arrangement
-    // could also be 'vertical'
-    .side('negative') // set the side(s) available for accumulation 
-    // could also be 'positive' or 'negative'
-    .arrange(); 
-
-    console.log(swarm)
-
-    const svg = d3.select(".interactive-wrapper").append("svg").attr("height", height).attr("width", width);
-
-    svg.selectAll('circle')
-    .data(swarm)
-    .enter()
-    .append('circle')
-    .attr('cx', function(bee) {
-        return bee.x;
-    })
-    .attr('cy', function(bee) {
-        return bee.y + height/2;
-    })
-    .attr('r', 12.5)
-    .style('fill', function(bee) {
-        return colourScale(bee.datum.leftAfterBrexit);
-    })
-    .style('stroke', function(bee) {
-        return colourScale(bee.datum.leftAfterBrexit);
-    })
-    .style("stroke-width", 1)
-    .style("fill-opacity", 0.75)
-    .on("mousemove", function(d) {
-        d3.select(".label").text(d.datum.I + " – " + Number(d.datum.leftAfterBrexit).toFixed(2))
-    })
-});
-
-
-// const yScale = d3.scaleLinear().domain([0, 1]).range([0, height]).clamp(true)  
-// var swarm = d3Beeswarm
-// .beeswarm()
-// .data(data.filter(d => d.leftAfterBrexit !== "NA")) // set the data to arrange
-// .distributeOn(function(d) {
-//     // set the value accessor to distribute on
-//     return yScale(Number(d.leftAfterBrexit)); // evaluated once on each element of data
-// }) // when starting the arrangement
-// .radius(10) // set the radius for overlapping detection
-// .orientation('vertical') // set the orientation of the arrangement
-// // could also be 'vertical'
-// .side('symetric') // set the side(s) available for accumulation 
-// // could also be 'positive' or 'negative'
-// .arrange(); 
-
-// console.log(swarm)
-
-// const svg = d3.select(".interactive-wrapper").append("svg").attr("height", height).attr("width", width);
-
-// svg.selectAll('circle')
-// .data(swarm)
-// .enter()
-// .append('circle')
-// .attr('cx', function(bee) {
-//   return bee.x + width/2;
-// })
-// .attr('cy', function(bee) {
-//   return bee.y;
-// })
-// .attr('r', 9.5)
-// .style('fill', function(bee) {
-//   return colourScale(bee.datum.leftAfterBrexit);
-// })
-// .on("mouseenter", function(d) {
     
-// });
+
+});
