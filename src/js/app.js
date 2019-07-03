@@ -13,8 +13,8 @@ const euCountries = ["United Kingdom", "Spain", "France", "Germany", "Poland", "
 
 console.log(euCountries);
 
-const width = 1260
-const height = 800
+const width = document.querySelector(".interactive-wrapper").clientWidth;
+const height = window.innerHeight;
 
 const mapped = fc.features.map(f => {
     return Object.assign({}, f, {name: geoff.alpha3ToName(geoff.numericToAlpha3(f.id))})
@@ -93,26 +93,18 @@ const countryShapes = svg
         }
     })
 
-const layer1 = svg.append("g")
-const layer2 = svg.append("g")
-const layer3 = svg.append("g")
+const dataviz1 = svg.append("g")
+const dataviz2 = svg.append("g")
 
+let activeDatavizLayer = dataviz1;
+let activeName = "1";
 
 Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91NCP37AF5TOsrVZIIIdzbFsftnq66m5cokKtA.json"),d3Fetch.csv("<%= path %>/assets/trade_eu.csv")]).then(data => {
     const centroids = data[0].sheets.Sheet1;
-    const item = "Potatoes, frozen";
     const ukCentroid = centroids.find(b => b.name === "United Kingdom");
     const ukCentroidProjected = proj([Number(ukCentroid.longitude), Number(ukCentroid.latitude)]);
 
     const imports = data[1].filter(d => d.Element === "Import Value").filter(d => d.Value != "0")
-
-    const toMap = imports.filter(d => d.Item === item);
-
-    svg.append("text")
-      .text(item)
-      .attr('x', 0)
-      .attr("y", 48)
-      .classed("big-label", true)
 
     const liner = d3.line()
         .x(d => d[0])
@@ -120,131 +112,121 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
         .curve(d3.curveBasis);
 
     const rScale = d3.scaleSqrt().domain(d3.extent(imports, d => d.Value)).range([0.5, 40]).clamp(true);
-    // console.log(d3.extent(imports, d => d.Value))
-    fc.features.forEach(f => {
-        if(euCountries.filter(c => c === f.name).length > 0) {
-            let centroid = centroids.find(b => b.name === f.name);
-            // console.log(centroid)
 
-            const datum = toMap.find(d => d["Partner Countries"] === f.name);
-            if(datum && centroid) {
-                // svg.append("circle")
-                //     .attr("cx", proj([Number(centroid.longitude), Number(centroid.latitude)])[0])
-                //     .attr("cy", proj([Number(centroid.longitude), Number(centroid.latitude)])[1])
-                //     .attr("r", rScale(datum.Value))
-                //     .attr("id", "c-" + f.name)
-                //     .style("fill", "rgba(0,0,0,0.5)")
-                //     .style("stroke", "rgba(0,0,0,0.75)");
+    const animationDuration = 1000;
+    
+    const draw = item => {
+      activeDatavizLayer.transition().duration(animationDuration).style("opacity", 0);
+      activeDatavizLayer = (activeName === "1") ? dataviz2 : dataviz1;
+      activeName = (activeName === "1") ? "2": "1";
+      activeDatavizLayer.html("");
 
-                // svg.append("line")
-                //     .attr("x1", proj([Number(centroid.longitude), Number(centroid.latitude)])[0])
-                //     .attr("y1", proj([Number(centroid.longitude), Number(centroid.latitude)])[1])
-                //     .attr("x2", ukCentroidProjected[0])
-                //     .attr("y2", ukCentroidProjected[1])
-                //     .style("fill", "none")
-                //     .style("stroke", "red")
-                //     .style("stroke-width", rScale(datum.Value));
+      const layer1 = activeDatavizLayer.append("g")
+      const layer2 = activeDatavizLayer.append("g")
+      const layer3 = activeDatavizLayer.append("g")
 
-                const start = proj([Number(centroid.longitude), Number(centroid.latitude)]);
-                const end = ukCentroidProjected;
-                const radius = 40;
-                // console.log(rScale(datum.Value))
+      activeDatavizLayer.append("text")
+        .text(item)
+        .attr('x', 0)
+        .attr("y", 48)
+        .classed("big-label", true)
 
-                const mid = (true) ? [start[0], end[1]] : [end[0], start[1]];
+      const toMap = imports.filter(d => d.Item === item);
 
-                const bgpath = layer1.append("path")
-                    .attr("d", liner([
-                        start,
-                        mid,
-                        end
-                      ]))
-                      .style("fill", "none")
-                    .style("stroke", "#bdbdbd")
-                    .style("stroke-width", 0.5)
+      fc.features.forEach(f => {
+          if(euCountries.filter(c => c === f.name).length > 0) {
+              let centroid = centroids.find(b => b.name === f.name);
 
-                const path = layer2.append("path")
-                    .attr("d", liner([
-                        start,
-                        mid,
-                        end
-                      ]))
-                      .style("fill", "none")
-                    .style("stroke", palette.highlightDark)
-                    .style("stroke-width", rScale(datum.Value))
-                    .style("stroke-linecap", "square")
-                    .classed("animated-line", true)
-                    .transition()
-                    .delay(5000)
-                    .duration(1000)
-                    .style("stroke-width", 100)
+              const datum = toMap.find(d => d["Partner Countries"] === f.name);
+              if(datum && centroid) {
+                  const start = proj([Number(centroid.longitude), Number(centroid.latitude)]);
+                  const end = ukCentroidProjected;
 
-                if(f.name !== "Denmark") {    
-                  const label = layer3.append("text")
-                      .style("text-anchor", "middle")
-                      .attr("x", start[0])
-                      .attr("y", start[1] + 10)
-                      .text(f.name)
-                      .classed("country-name", true)
-                      .style("font-weight", "bold")
-                      // .style("font-size", "14px")
+                  const mid = (true) ? [start[0], end[1]] : [end[0], start[1]];
 
-                  const label2 = layer3.append("text")
-                      .style("text-anchor", "middle")
-                      .attr("x", start[0])
-                      .attr("y", start[1] + 26)
-                      .text(`$${utils.numberWithCommas(Number(datum.Value)*1000)}`) 
-                      .classed("country-name", true)
-                      // .style("fill", "#767676") 
-                      .classed("country-name--number", true)
-                } else {
-                  const label = layer3.append("text")
-                      .style("text-anchor", "middle")
-                      .attr("x", start[0])
-                      .attr("y", start[1] - 24)
-                      .text(f.name)
-                      .classed("country-name", true)
-                      .style("font-weight", "bold")
-                      // .style("font-size", "14px")
+                  const bgpath = layer1.append("path")
+                      .attr("d", liner([
+                          start,
+                          mid,
+                          end
+                        ]))
+                        .style("fill", "none")
+                      .style("stroke", "#bdbdbd")
+                      .style("stroke-width", 0.5)
 
-                  const label2 = layer3.append("text")
-                      .style("text-anchor", "middle")
-                      .attr("x", start[0])
-                      .attr("y", start[1] - 8)
-                      .text(`$${utils.numberWithCommas(Number(datum.Value)*1000)}`) 
-                      .classed("country-name", true)
-                      // .style("fill", "#767676") 
-                      .classed("country-name--number", true)
-                }
+                  const path = layer2.append("path")
+                      .attr("d", liner([
+                          start,
+                          mid,
+                          end
+                        ]))
+                        .style("fill", "none")
+                      .style("stroke", palette.highlightDark)
+                      .style("stroke-width", rScale(datum.Value))
+                      .style("stroke-linecap", "square")
+                      .classed("animated-line", true)
 
-                // function pathTween(circle, path){
-                //     var length = path.node().getTotalLength(); // Get the length of the path
-                //     var r = d3.interpolate(0, length); //Set up interpolation from 0 to the path length
+                  if(f.name !== "Denmark") {    
+                    const label = layer3.append("text")
+                        .style("text-anchor", "middle")
+                        .attr("x", start[0])
+                        .attr("y", start[1] + 10)
+                        .text(f.name)
+                        .classed("country-name", true)
+                        .style("font-weight", "bold")
+                        // .style("font-size", "14px")
 
-                //     return function(t){
-                //         var point = path.node().getPointAtLength(r(t)); // Get the next point along the path
-                //         // console.log(point, path.node(), circle);
-                //         d3.select(circle) // Select the circle
-                //             .attr("cx", point.x) // Set the cx
-                //             .attr("cy", point.y) // Set the cy
-                //     }
-                // }
+                    const label2 = layer3.append("text")
+                        .style("text-anchor", "middle")
+                        .attr("x", start[0])
+                        .attr("y", start[1] + 26)
+                        .text(`$${utils.numberWithCommas(Number(datum.Value)*1000)}`) 
+                        .classed("country-name", true)
+                        // .style("fill", "#767676") 
+                        .classed("country-name--number", true)
+                  } else {
+                    const label = layer3.append("text")
+                        .style("text-anchor", "middle")
+                        .attr("x", start[0])
+                        .attr("y", start[1] - 24)
+                        .text(f.name)
+                        .classed("country-name", true)
+                        .style("font-weight", "bold")
+                        // .style("font-size", "14px")
 
-                // svg.append("circle")
-                //     .attr("cx", proj([Number(centroid.longitude), Number(centroid.latitude)])[0]) //Starting x
-                //     .attr("cy", proj([Number(centroid.longitude), Number(centroid.latitude)])[1]) //Starting y
-                //     .attr("r", 10)
-                //     .transition()
-                //     .delay(250)
-                //     .duration(1000) 
-                //     .ease(d3.easeLinear)
-                //     .tween("pathTween", function() { return pathTween(this, path);})
+                    const label2 = layer3.append("text")
+                        .style("text-anchor", "middle")
+                        .attr("x", start[0])
+                        .attr("y", start[1] - 8)
+                        .text(`$${utils.numberWithCommas(Number(datum.Value)*1000)}`) 
+                        .classed("country-name", true)
+                        // .style("fill", "#767676") 
+                        .classed("country-name--number", true)
+                  }
+              } 
+          } else {
+              // return "#f6f6f6"
+          }
 
-                // console.log(rScale(datum.Value))
-            } else {
-                // console.log(toMap, f.name, centroid);
-            }
-        } else {
-            // return "#f6f6f6"
-        }
-    });
+          activeDatavizLayer.transition().duration(animationDuration).style("opacity", 1)
+      });
+    }
+
+    const dropdown = d3.select(".dropdown")
+      .append("select");
+
+    const listOfItems = (d3.nest().key(d => d.Item).entries(imports)).map(d => d.key);
+
+    dropdown.selectAll("option")
+        .data(listOfItems)
+          .enter()
+          .append("option")
+          .text(d => d)
+          .attr("value", d => d)
+
+    dropdown.on("change", function(d) {
+      draw(dropdown.node().value)
+    })
+
+    draw(listOfItems[0])
 });

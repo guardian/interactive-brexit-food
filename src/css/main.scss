@@ -34,7 +34,15 @@
         circle:hover {
             fill-opacity: 0.25 !important;
         }
+
+        border-top: 1px solid #dcdcdc;
+        border-bottom: 1px solid #dcdcdc;
     }
+}
+
+.dropdown {
+    position: absolute;
+    top: 72px;
 }
 
 // svg path {
