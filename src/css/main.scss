@@ -11,11 +11,11 @@
 .interactive-atom {
     margin: 0 !important;
     
-    text {
-        font-family: "Guardian Text Sans Web";
-        font-size: 14px;
-        font-weight: 300;
-    }
+    // text {
+    //     font-family: "Guardian Text Sans Web";
+    //     font-size: 14px;
+    //     font-weight: 300;
+    // }
 
     .x-axis text {
         transform: rotate(45deg) translateX(15px);
@@ -29,11 +29,53 @@
         overflow: visible;
         circle {
             transition: fill-opacity 0.33s ease-in-out;
+            // filter:url('#goo');
         }
         circle:hover {
             fill-opacity: 0.25 !important;
         }
     }
+}
+
+// svg path {
+//     fill: none;
+//     stroke: #ddd;
+//     stroke-dasharray: 2,2;
+//     stroke-width: 2px;
+//     stroke-linecap: round;
+// }
+
+@keyframes dash {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+svg .animated-line {
+    stroke-dashoffset: 1000000;
+    stroke-dasharray: 1,50 !important;
+    animation: dash 20000s linear infinite !important;
+    stroke-linecap: round;
+}
+
+.country-name {
+    @include fs-textSans(1);
+    font-size: 12px;
+    // fill: #333;
+    stroke: white;
+    paint-order: stroke;
+    stroke-width: 2px;
+    // text-transform: uppercase;
+}
+
+.country-name--number {
+    // font-family: "Droid Sans Mono";
+    // text-transform: uppercase;
+    fill: #767676;
+}
+
+.big-label {
+    @include fs-titlepiece(1);
 }
 
 .circles {
