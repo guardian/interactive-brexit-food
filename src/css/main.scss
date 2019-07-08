@@ -1,6 +1,7 @@
 @import "mq";
 @import "fonts";
 @import "palette";
+@import "scrolly";
 
 // Uncomment for embeds
 //@import "embed";
@@ -35,14 +36,15 @@
             fill-opacity: 0.25 !important;
         }
 
-        border-top: 1px solid #dcdcdc;
-        border-bottom: 1px solid #dcdcdc;
+        // border-top: 1px solid #dcdcdc;
+        // border-bottom: 1px solid #dcdcdc;
     }
 }
 
 .dropdown {
-    position: absolute;
-    top: 72px;
+    // position: absolute;
+    // top: 72px;
+    // display: none;
 }
 
 // svg path {
@@ -63,6 +65,13 @@ svg .animated-line {
     stroke-dashoffset: 1000000;
     stroke-dasharray: 1,50 !important;
     animation: dash 20000s linear infinite !important;
+    stroke-linecap: round;
+}
+
+svg .animated-line--reverse {
+    stroke-dashoffset: 1000000;
+    stroke-dasharray: 1,50 !important;
+    animation: dash 20000s linear infinite reverse !important;
     stroke-linecap: round;
 }
 
@@ -133,4 +142,45 @@ svg .animated-line {
 .wrapper {
     height: 4000px;
     position: relative;
+}
+
+.dropdown-1 select, .dropdown-2 select {
+    font-size: 16px;
+    line-height: 20px;
+    @include fs-headline(2);
+    // font-weight: 900;
+    background-color: #dcdcdc;
+    border-radius: 0px;
+    border: 0;
+    height: 35px;
+    outline: 0;
+    // margin: 0 10px;
+    margin-right: 10px;
+    padding-left: 5px;
+    width: 100%;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.dropdown-1, .dropdown-2 {
+    display: inline-block;
+    // width: 48%;
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+
+.dropdown-1::before {
+    display: block;
+    content: "Choose a food item";
+    @include fs-textSans(2);
+    font-weight: bold;
+    padding-bottom: 4px;
+}
+
+.dropdown-2::before {
+    display: block;
+    content: "Show imports or exports?";
+    @include fs-textSans(2);
+    font-weight: bold;
+    padding-bottom: 4px;
 }
