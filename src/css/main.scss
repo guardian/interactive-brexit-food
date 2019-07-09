@@ -2,6 +2,7 @@
 @import "fonts";
 @import "palette";
 @import "scrolly";
+@import "immersive";
 
 // Uncomment for embeds
 //@import "embed";
@@ -45,6 +46,28 @@
     // position: absolute;
     // top: 72px;
     // display: none;
+}
+
+.imports {
+    @include fs-textSans(2);
+    font-weight: bold;
+    // font-weight: 400;
+    color: #ffbb50;
+    margin-bottom: 2px;
+}
+
+.exports {
+    @include fs-textSans(2);
+    font-weight: bold;
+    // font-weight: 400;
+    color: #00b2ff;
+    margin-bottom: 2px;
+}
+
+#data-viz {
+    background-color: #fff;
+    border-top: 1px solid #dcdcdc;
+    border-bottom: 1px solid #dcdcdc;
 }
 
 // svg path {

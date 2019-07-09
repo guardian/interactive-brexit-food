@@ -19,8 +19,12 @@ const fc = topojson.feature(world, world.objects.countries) // I always call it 
 
 const euCountries = ["United Kingdom", "Spain", "France", "Germany", "Poland", "Austria", "Portugal", "Luxembourg", "Italy", "Denmark", "Netherlands", "Belgium", "Switzerland", "Czechia", "Croatia", "Cyprus", "Romania", "Bulgaria", "Estonia", "Latvia", "Ireland", "Hungary", "Greece", "Slovakia", "Slovenia", "Sweden"];
 
-const width = document.querySelector("#scrolly-1").clientWidth;
+const width = document.body.clientWidth;
 const height = window.innerHeight;
+
+const margin = document.querySelector("#scrolly-1").getBoundingClientRect().left
+
+document.querySelector("#scrolly-1").style.marginLeft = -margin + "px"
 
 const mapped = fc.features.map(f => {
     return Object.assign({}, f, {name: geoff.alpha3ToName(geoff.numericToAlpha3(f.id))})
@@ -65,18 +69,21 @@ const bbox = {
   ]
 };
 
+const offset = (width > 900) ? 300 : 0;
+
 const proj = d3Projections.geoBonne()
-  .fitSize([width - 300, height], bbox)
+  .fitSize([width - offset, height], bbox)
 
 const path = d3.geoPath()
   .projection(proj)
+
 
 const svg = d3.select("#data-viz")
     .attr("height", height)
     .attr("width", width)
     .style("overflow", "hidden")
     .append("g")
-    .style("transform", "translateX(300px)");
+    .style("transform", "translateX(" + offset + "px)");
 
 const countryShapes = svg
     .selectAll('blah')
@@ -149,7 +156,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
 
               const datumImports = toMapImports.find(d => d["Partner Countries"] === f.name);
               const datumExports = toMapExports.find(d => d["Partner Countries"] === f.name);
-              if((datumImports && datumExports) && centroid) {
+              if(((showImports && datumImports) || (showExports && datumExports)) && centroid) {
                   const start = proj([Number(centroid.longitude), Number(centroid.latitude)]);
                   const end = ukCentroidProjected;
 
@@ -162,10 +169,10 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                           end
                         ]))
                         .style("fill", "none")
-                      .style("stroke", "#bdbdbd")
+                      .style("stroke", "#dcdcdc")
                       .style("stroke-width", 0.5)
 
-                    if(showImports) {
+                    if(showImports && datumImports) {
                       const path = layer2.append("path")
                           .attr("d", liner([
                               start,
@@ -179,7 +186,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                           .classed("animated-line", true)
                     }
 
-                    if(showExports) {
+                    if(showExports && datumExports) {
                       const pathExports = layer2.append("path")
                           .attr("d", liner([
                               start,
@@ -204,28 +211,28 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                       .classed("country-name", true)
                       // .style("font-weight", "bold")
                      
-                  if(showImports) {
+                  if(showImports && datumImports) {
                         // .style("font-size", "14px")
 
                     const label2 = layer3.append("text")
                         .style("text-anchor", "middle")
                         .attr("x", start[0])
                         .attr("y", start[1] + 26)
-                        .text(`I: $${numeral(Number(datumImports.Value)*1000).format("0.0a")}`) 
+                        .text(`I: $${numeral(Number(datumImports.Value)*1000).format("0a")}`) 
                         .classed("country-name", true)
                         // .style("fill", "#767676") 
                         .classed("country-name--number", true)
                         .style("fill", palette.highlightDark)
                   }
 
-                  if(showExports) {
+                  if(showExports && datumExports) {
                     // .style("font-size", "14px")
 
                     const label2 = layer3.append("text")
                         .style("text-anchor", "middle")
                         .attr("x", start[0])
-                        .attr("y", (showImports) ? start[1] + 42 : start[1] + 26)
-                        .text(`E: $${numeral(Number(datumExports.Value)*1000).format("0.0a")}`) 
+                        .attr("y", (showImports && datumImports) ? start[1] + 42 : start[1] + 26)
+                        .text(`E: $${numeral(Number(datumExports.Value)*1000).format("0a")}`) 
                         .classed("country-name", true)
                         // .style("fill", "#767676") 
                         .classed("country-name--number", true)
