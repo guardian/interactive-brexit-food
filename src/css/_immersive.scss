@@ -1,24 +1,30 @@
 @import "immersive-header";
 
+.i-related-content {
+    // background-color: #161616;
+    background-color: #fff;
+}
+
 .i-wrapper {
     width: 100%;
     margin: auto;
     min-height: 100vh;
     position: relative;
+    color: #fff;
 
     &:before {
         content: '';
         display: none;
         position: absolute;
-        border-left: 1px solid #dcdcdc;
+        border-left: 1px solid #333;
         width: 0;
         height: 100%;
     }
 
     @include mq(tablet) {
         width: 740px;
-        border-left: 1px solid #dcdcdc;
-        border-right: 1px solid #dcdcdc;
+        border-left: 1px solid #333;
+        border-right: 1px solid #333;
         box-sizing: border-box;
     }
 

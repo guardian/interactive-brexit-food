@@ -94,16 +94,16 @@ const countryShapes = svg
     .attr("id", d => d.name)
     .style("fill", d => {
         if(euCountries.filter(f => f === d.name).length > 0) {
-            return "#eaeaea";
+            return "#333";
         } else {
-            return "#fff"
+            return "#161616"
         }
     })
     .style("stroke", d => {
         if(euCountries.filter(f => f === d.name).length > 0) {
-            return "#fff";
+            return "#161616";
         } else {
-            return "#eaeaea"
+            return "#333"
         }
     })
 
@@ -169,7 +169,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                           end
                         ]))
                         .style("fill", "none")
-                      .style("stroke", "#dcdcdc")
+                      .style("stroke", "#767676")
                       .style("stroke-width", 0.5)
 
                     if(showImports && datumImports) {
@@ -410,7 +410,7 @@ const grid = d3.range(0, 1, 0.5);
 chart.append("path")
 .attr("d", `M${A}L${B}L${C}Z`)
 // .attr("stroke", "#000")
-.attr("fill", "#f6f6f6")
+.attr("fill", "#333")
 .style("shape-rendering", "crispEdges");
 
 // grid
@@ -429,7 +429,7 @@ chart.append("g")
     .attr("y1", d => d[0][1])
     .attr("x2", d => d[1][0])
     .attr("y2", d => d[1][1])
-    .attr("stroke", (d, i) => (i & 1) ? "#fff" : "#000")
+    .attr("stroke", (d, i) => (i & 1) ? "#161616" : "#161616")
     .style("shape-rendering",  "auto")
     .attr("stroke-width", (d, i) => (i & 1) ? 1 : 1);
 
@@ -458,8 +458,8 @@ chart.append("g")
     .selectAll(".labels")
     .data([
         { label: "◀ Imported more from EU", pos: _a(0.51), rot: 60, "text-anchor": "end", "color": "#ffb500"},
-        { label: "◀ UK produces more", pos: _b(0.51), rot: -60, "text-anchor": "end", "color": "#c70000"},
-        { label: "◀ UK produces more", pos: _c(0.49), rot: 0, "text-anchor": "end", "color": "#c70000"},
+        { label: "◀ UK produces more", pos: _b(0.51), rot: -60, "text-anchor": "end", "color": "#ff4e36"},
+        { label: "◀ UK produces more", pos: _c(0.49), rot: 0, "text-anchor": "end", "color": "#ff4e36"},
         { label: "Imported more from non-EU ▶", pos: _a(0.49), rot: 60, "text-anchor": "start", "color": "#00b2ff"},
         { label: "Imported more from EU ▶", pos: _b(0.49), rot: -60, "text-anchor": "start", "color": "#ffb500"},
         { label: "Imported more from non-EU ▶", pos: _c(0.51), rot: 0, "text-anchor": "start", "color": "#00b2ff"}
@@ -487,7 +487,7 @@ const colourise = (d) => {
   }
 
   if(Number(d.production_perc) > 0.5) {
-    return "#c70000"
+    return "#ff4e36"
   }
   return "#767676";
 }
@@ -594,7 +594,7 @@ d3Fetch.csv("<%= path %>/assets/sorted_2.csv").then(data => {
       .attr("x", d => (d.label) ? positionLabel(d.pos, d.label.position)[0] : d.pos[0])
       .attr("y", d => (d.label) ? positionLabel(d.pos, d.label.position)[1] : d.pos[1])
       .style("font-size", "13")
-      .style("fill", "#000")
+      .style("fill", "#fff")
       .style("text-anchor", d => positionLabel(d.pos, d.label.position)[2])
       .text(d => d.displayName || d.name)
 
