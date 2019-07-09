@@ -50,6 +50,8 @@
     "webpack-stream": "5.0.0"
   },
   "dependencies": {
+    "chroma": "0.0.1",
+    "chroma-js": "^2.0.4",
     "core-js": "^2.6.2",
     "d3": "^4.13.0",
     "d3-beeswarm": "0.0.5",
