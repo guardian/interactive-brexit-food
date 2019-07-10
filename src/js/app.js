@@ -17,7 +17,7 @@ const scrolly = new ScrollyTeller({
 
 const fc = topojson.feature(world, world.objects.countries) // I always call it 'fc' for 'FeatureCollection'
 
-const euCountries = ["United Kingdom", "Spain", "France", "Germany", "Poland", "Austria", "Portugal", "Luxembourg", "Italy", "Denmark", "Netherlands", "Belgium", "Switzerland", "Czechia", "Croatia", "Cyprus", "Romania", "Bulgaria", "Estonia", "Latvia", "Ireland", "Hungary", "Greece", "Slovakia", "Slovenia", "Sweden"];
+const euCountries = ["United Kingdom", "Spain", "France", "Germany", "Poland", "Austria", "Portugal", "Luxembourg", "Italy", "Denmark", "Netherlands", "Belgium", "Czechia", "Croatia", "Cyprus", "Romania", "Bulgaria", "Estonia", "Latvia", "Ireland", "Hungary", "Greece", "Slovakia", "Slovenia", "Sweden"];
 
 const width = document.body.clientWidth;
 const height = window.innerHeight;
@@ -113,7 +113,7 @@ const dataviz2 = svg.append("g")
 let activeDatavizLayer = dataviz1;
 let activeName = "1";
 
-Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91NCP37AF5TOsrVZIIIdzbFsftnq66m5cokKtA.json"),d3Fetch.csv("<%= path %>/assets/trade_eu_2.csv")]).then(data => {
+Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91NCP37AF5TOsrVZIIIdzbFsftnq66m5cokKtA.json"),d3Fetch.csv("<%= path %>/assets/trade_eu.csv")]).then(data => {
     const centroids = data[0].sheets.Sheet1;
     const ukCentroid = centroids.find(b => b.name === "United Kingdom");
     const ukCentroidProjected = proj([Number(ukCentroid.longitude), Number(ukCentroid.latitude)]);
