@@ -11,7 +11,7 @@ const clean = async(immersiveData) => {
     const cleanedBlocks = immersiveData.body.blocks.map(b => {
         if(b.type === "copy") {
             b.text = b.text.split("\r\n\r\n\r\n");
-        }
+        } 
         b[b.type] = true;
         return b;
     }); 
@@ -23,7 +23,7 @@ const clean = async(immersiveData) => {
     immersiveData.emailLink = 'mailto:?subject=' + encodeURIComponent(immersiveData.header.shareText) + '&body=' + encodeURIComponent(immersiveData.header.url + '?CMP=share_btn_link');
     immersiveData.relatedContent = relatedContent.html;
     return immersiveData;
-}
+} 
  
 export async function render() {
     const data = await clean(await rp({uri: "https://interactive.guim.co.uk/docsdata-test/1o4Z7PNCEIIjKDs4JdVzoVOl5TksTg8rJYChNh7MJOIc.json", json: true}));

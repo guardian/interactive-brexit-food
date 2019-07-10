@@ -64,7 +64,7 @@
     line-height: 1.35;
     margin-bottom: 4px;
     a {
-        color: #ff4e36;
+        color: #dcdcdc;
         @include fs-header(1);
         font-size: 17px;
     }
@@ -109,7 +109,7 @@
 .i-header__top-tag {
     a {
         @include fs-header(4);
-        color: #ff4e36;
+        color: #dcdcdc;
         @include mq(leftCol) {
             position: absolute;
             top: 0;
@@ -141,7 +141,7 @@
     border: 1px solid #333333; 
 
     &:hover {
-        background-color: #ff4e36;
+        background-color: #dcdcdc;
 
         .od-share__icon {
             fill: $neutral-100;
@@ -150,7 +150,7 @@
 }
 
 .od-share__icon {
-    fill: #ff4e36;
+    fill: #dcdcdc;
     width: 100%;
     height: 100%;
     margin: auto;

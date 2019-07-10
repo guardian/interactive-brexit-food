@@ -2,7 +2,19 @@
 
 .i-related-content {
     // background-color: #161616;
-    background-color: #fff;
+    // background-color: #fff;
+
+    h2 {
+        color: #fff;
+    }
+
+    *, *::before {
+        border-color: #333 !important;
+    }
+
+    .fc-container__header__title:after, .fc-container__header__title>h2:after, .fc-container__title__text:after, .fc-container__header__title--sticky:after, .container__title:after {
+        background-color: transparent;
+    }
 }
 
 .i-wrapper {

@@ -10,7 +10,7 @@ import numeral from "numeral"
 console.log(document.querySelector("#scrolly-1"))
 const scrolly = new ScrollyTeller({
   parent: document.querySelector("#scrolly-1"),
-  triggerTop: 1/3, // percentage from the top of the screen that the trigger should fire
+  triggerTop: 1/2, // percentage from the top of the screen that the trigger should fire
   triggerTopMobile: 0.75,
   transparentUntilActive: true
 }); 
@@ -162,17 +162,21 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
 
                   const mid = (true) ? [start[0], end[1]] : [end[0], start[1]];
 
-                  const bgpath = layer1.append("path")
+                    if(showImports && datumImports) {
+
+                      const bgpath = layer1.append("path")
                       .attr("d", liner([
                           start,
                           mid,
                           end
                         ]))
                         .style("fill", "none")
-                      .style("stroke", "#767676")
-                      .style("stroke-width", 0.5)
+                      .style("stroke", palette.highlightDark)
+                      .style("stroke-opacity", 0.075)
+                      .style("stroke-width", rScale(datumImports.Value))
+                      .style("stroke-linecap", "round")
 
-                    if(showImports && datumImports) {
+
                       const path = layer2.append("path")
                           .attr("d", liner([
                               start,
@@ -182,11 +186,25 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                             .style("fill", "none")
                           .style("stroke", palette.highlightDark)
                           .style("stroke-width", rScale(datumImports.Value))
-                          .style("stroke-linecap", "square")
+                          // .style("stroke-linecap", "square")
                           .classed("animated-line", true)
                     }
 
                     if(showExports && datumExports) {
+
+                      const bgpath = layer1.append("path")
+                      .attr("d", liner([
+                          start,
+                          mid,
+                          end
+                        ]))
+                        .style("fill", "none")
+                      .style("stroke", palette.guSport)
+                      .style("stroke-opacity", 0.075)
+                      .style("stroke-width", rScale(datumExports.Value))
+                      .style("stroke-linecap", "round")
+
+
                       const pathExports = layer2.append("path")
                           .attr("d", liner([
                               start,
@@ -196,7 +214,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                             .style("fill", "none")
                           .style("stroke", palette.guSport)
                           .style("stroke-width", rScale(datumExports.Value))
-                          .style("stroke-linecap", "square")
+                          // .style("stroke-linecap", "square")
                           .classed("animated-line", true)
                           .classed("animated-line--reverse", true)
                     }
@@ -218,7 +236,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                         .style("text-anchor", "middle")
                         .attr("x", start[0])
                         .attr("y", start[1] + 26)
-                        .text(`I: $${numeral(Number(datumImports.Value)*1000).format("0a")}`) 
+                        .text(`$${numeral(Number(datumImports.Value)*1000).format("0a")}`) 
                         .classed("country-name", true)
                         // .style("fill", "#767676") 
                         .classed("country-name--number", true)
@@ -232,7 +250,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                         .style("text-anchor", "middle")
                         .attr("x", start[0])
                         .attr("y", (showImports && datumImports) ? start[1] + 42 : start[1] + 26)
-                        .text(`E: $${numeral(Number(datumExports.Value)*1000).format("0a")}`) 
+                        .text(`$${numeral(Number(datumExports.Value)*1000).format("0a")}`) 
                         .classed("country-name", true)
                         // .style("fill", "#767676") 
                         .classed("country-name--number", true)
@@ -543,11 +561,11 @@ d3Fetch.csv("<%= path %>/assets/sorted_2.csv").then(data => {
       .data(cleanedData.filter(d => !d.label))
       .enter().append("circle")
           // .attr("r", d => rScale(d.total))
-          .attr("r", d => 5)
+          .attr("r", d => 3.5)
           .attr("id", d => d.name)
           .attr("cx", d => d.pos[0])
           .attr("cy", d => d.pos[1])
-          .attr("fill", d => chroma.mix(d.color, '#fff', 0.29))
+          .attr("fill", d => d.color)
           .attr("stroke", d => {
             // if(foodsToLabel.filter(c => d.name === c.name).length > 0) {
             //   return "#000"
@@ -561,31 +579,34 @@ d3Fetch.csv("<%= path %>/assets/sorted_2.csv").then(data => {
             const ml = document.querySelector(".mouse-overlay");
             ml.style.display = "none"
           })
-          // .style("fill-opacity", "0.5")
+          .style("fill-opacity", "0.05")
+          .style("stroke-width", 1.5)
           // .append("title").text(d => d.name)
 
     chart.selectAll(".countries")
           .data(cleanedData.filter(d => d.label))
           .enter().append("circle")
               // .attr("r", d => rScale(d.total))
-              .attr("r", d => 5)
+              .attr("r", d => 3.5)
               .attr("id", d => d.name)
               .attr("cx", d => d.pos[0])
               .attr("cy", d => d.pos[1])
-              .attr("fill", d => chroma.mix(d.color, '#fff', 0.29))
+              .attr("fill", d => d.color)
+              // .style("fill-opacity", "0.5")
+              .style("stroke-width", 1.5)
               .attr("stroke", d => {
-                if(foodsToLabel.filter(c => d.name === c.name).length > 0) {
-                  return "#000"
-                }
+                // if(foodsToLabel.filter(c => d.name === c.name).length > 0) {
+                //   return "#000"
+                // }
                 return d.color
               })
-              .on("mouseover", function(d) {
+              .on("mouseenter", function(d) {
                 mouseenter(d);
               })
               .on("mouseleave", function(d) {
                 const ml = document.querySelector(".mouse-overlay");
                 ml.style.display = "none"
-              })
+              }) 
 
   chart.selectAll("text.circle-labels")
     .data(cleanedData.filter(d => d.label))
@@ -597,6 +618,17 @@ d3Fetch.csv("<%= path %>/assets/sorted_2.csv").then(data => {
       .style("fill", "#fff")
       .style("text-anchor", d => positionLabel(d.pos, d.label.position)[2])
       .text(d => d.displayName || d.name)
+
+  const anno = [`Foods higher up the chart`, `are more reliant on`, `EU imports, and so are possibly`, `more at risk of disruption`, `in a no-deal Brexit`];
+  
+  anno.forEach((n, i) => {
+    svg.append("text")
+      .classed("text-label-ternary", true)
+      .text(n)
+      .attr("x", 120)
+      .attr("y", 120 + (i*18))
+  });
+
 
 });
 }
