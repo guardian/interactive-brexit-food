@@ -69,17 +69,19 @@ const bbox = {
   ]
 };
 
-const offset = (width > 900) ? 300 : 0;
+const isMobile = (window.innerWidth < 600 && window.innerHeight > window.innerWidth);
+
+const offset = (width > 900) ? 240 : 0;
 
 const proj = d3Projections.geoBonne()
-  .fitSize([width - offset, height], bbox)
+  .fitSize([width - offset, (isMobile) ? height/2 : height], bbox)
 
 const path = d3.geoPath()
   .projection(proj)
 
 
 const svg = d3.select("#data-viz")
-    .attr("height", height)
+    .attr("height", (isMobile) ? height/2 : height)
     .attr("width", width)
     .style("overflow", "hidden")
     .append("g")
@@ -111,7 +113,10 @@ const dataviz1 = svg.append("g")
 const dataviz2 = svg.append("g")
 
 let activeDatavizLayer = dataviz1;
+let inactiveDatavizLayer = dataviz2;
 let activeName = "1";
+let isAnimating = false;
+let lastItem = "Wine";
 
 Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91NCP37AF5TOsrVZIIIdzbFsftnq66m5cokKtA.json"),d3Fetch.csv("<%= path %>/assets/trade_eu.csv")]).then(data => {
     const centroids = data[0].sheets.Sheet1;
@@ -121,25 +126,40 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
     const imports = data[1].filter(d => d.Element === "Import Value").filter(d => d.Value != "0")
     const exports = data[1].filter(d => d.Element === "Export Value").filter(d => d.Value != "0")
 
+
+
     const liner = d3.line()
         .x(d => d[0])
         .y(d => d[1])
         .curve(d3.curveBasis);
     // console.log(d3.extent(data[1].filter(d => d.Value != "0"), d => Number(d.Value)))
-    const rScale = d3.scaleSqrt().domain(d3.extent(data[1].filter(d => d.Value != "0").filter(d => d.Item !== "Total"), d => Number(d.Value))).range([0.5, 35])
+
+    const maxR = Math.min(40*(width/1300), 40);
+
+    const rScale = d3.scaleSqrt().domain(d3.extent(data[1].filter(d => d.Value != "0").filter(d => d.Item !== "Total"), d => Number(d.Value))).range([0.5, maxR])
     // .clamp(true);
 
-    const animationDuration = 1000;
+    const animationDuration = 1000; 
     
     const draw = (item, showImports, showExports) => {
-      activeDatavizLayer.transition().duration(animationDuration).style("opacity", 0);
+      if(item !== lastItem) {
+        return;
+      }
+
+      if(isAnimating) {
+        setTimeout(() => {
+          draw(item, showImports, showExports);
+        }, 501);
+        return;
+      }
+      
       activeDatavizLayer = (activeName === "1") ? dataviz2 : dataviz1;
+      inactiveDatavizLayer = (activeName === "1") ? dataviz1 : dataviz2;
       activeName = (activeName === "1") ? "2": "1";
-      activeDatavizLayer.html("");
 
       const layer1 = activeDatavizLayer.append("g")
-      const layer2 = activeDatavizLayer.append("g")
       const layer3 = activeDatavizLayer.append("g")
+      const layer2 = activeDatavizLayer.append("g")
 
       // activeDatavizLayer.append("text")
       //   .text(item)
@@ -150,12 +170,16 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
       const toMapImports = imports.filter(d => d.Item === item);
       const toMapExports = exports.filter(d => d.Item === item); 
 
+      // const countriesToLabelImports = toMapImports.slice().sort((a,b) => Number(b.Value) - Number(a.Value)).map(d => d["Partner Countries"]).slice(0, 5);
+      // const countriesToLabelExports = toMapImports.slice().sort((a,b) => Number(b.Value) - Number(a.Value)).map(d => d["Partner Countries"]).slice(0, 5);
+
       fc.features.forEach(f => {
           if(euCountries.filter(c => c === f.name).length > 0) {
-              let centroid = centroids.find(b => b.name === f.name);
+              let centroid = centroids.find(b => b.name === f.name); 
 
               const datumImports = toMapImports.find(d => d["Partner Countries"] === f.name);
               const datumExports = toMapExports.find(d => d["Partner Countries"] === f.name);
+              
               if(((showImports && datumImports) || (showExports && datumExports)) && centroid) {
                   const start = proj([Number(centroid.longitude), Number(centroid.latitude)]);
                   const end = ukCentroidProjected;
@@ -180,7 +204,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                       const path = layer2.append("path")
                           .attr("d", liner([
                               start,
-                              mid,
+                              mid, 
                               end
                             ]))
                             .style("fill", "none")
@@ -220,39 +244,41 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                     }
 
                   // if(f.name !== "Denmark") {
-
+                  
+                  // if(countriesToLabelImports.find(n => n === f.name)) {
                   const label = layer3.append("text")
                       .style("text-anchor", "middle")
                       .attr("x", start[0])
-                      .attr("y", start[1] + 10)
-                      .text(f.name)
+                      .attr("y", start[1] + 14)
+                      .text((isMobile) ? geoff.nameToAlpha3(f.name) : f.name)
                       .classed("country-name", true)
                       // .style("font-weight", "bold")
                      
-                  if(showImports && datumImports) {
+                  if(showImports && datumImports && !isMobile) {
                         // .style("font-size", "14px")
 
                     const label2 = layer3.append("text")
                         .style("text-anchor", "middle")
                         .attr("x", start[0])
-                        .attr("y", start[1] + 26)
+                        .attr("y", start[1] + 30)
                         .text(`$${numeral(Number(datumImports.Value)*1000).format("0a")}`) 
                         .classed("country-name", true)
                         // .style("fill", "#767676") 
                         .classed("country-name--number", true)
                         .style("fill", palette.highlightDark)
                   }
+                  // }
 
-                  if(showExports && datumExports) {
+                  if(showExports && datumExports && !isMobile) {
                     // .style("font-size", "14px")
 
                     const label2 = layer3.append("text")
                         .style("text-anchor", "middle")
                         .attr("x", start[0])
-                        .attr("y", (showImports && datumImports) ? start[1] + 42 : start[1] + 26)
+                        .attr("y", (showImports && datumImports) ? start[1] + 42 : start[1] + 30)
                         .text(`$${numeral(Number(datumExports.Value)*1000).format("0a")}`) 
                         .classed("country-name", true)
-                        // .style("fill", "#767676") 
+                        // .style("fill", "#767676")  
                         .classed("country-name--number", true)
                         .style("fill", palette.guSport)
                   }
@@ -275,13 +301,20 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                   //       // .style("fill", "#767676") 
                   //       .classed("country-name--number", true)
                   }
-              } 
+              }  
           // } else {
           //     // return "#f6f6f6"
           // }
-
-          activeDatavizLayer.transition().duration(animationDuration).style("opacity", 1)
+          // });
       });
+
+      activeDatavizLayer.style("opacity", 1)
+      inactiveDatavizLayer.style("opacity", 0)
+      isAnimating = true;
+      setTimeout(() => {
+        isAnimating = false;
+        inactiveDatavizLayer.html("")
+      }, 500);
     }
 
     const dropdown = d3.select(".dropdown-1")
@@ -295,12 +328,13 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
           .append("option")
           .text(d => d)
           .attr("value", d => d)
-          .filter(n => (n === "Chocolate products nes")) 
+          .filter(n => (n === "Meat, sheep")) 
           .attr("selected", "selected")
 
     dropdown.on("change", function(d) {
       const showImports = importsExportsDropdown.node().value == "Imports" || importsExportsDropdown.node().value == "Imports & exports"
       const showExports = importsExportsDropdown.node().value == "Exports" || importsExportsDropdown.node().value == "Imports & exports"
+      lastItem = dropdown.node().value;
       draw(dropdown.node().value, showImports, showExports)
     })
 
@@ -320,40 +354,47 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
       const showImports = importsExportsDropdown.node().value == "Imports" || importsExportsDropdown.node().value == "Imports & exports"
       const showExports = importsExportsDropdown.node().value == "Exports" || importsExportsDropdown.node().value == "Imports & exports"
       // console.log(showImpo)
+      lastItem = dropdown.node().value;
       draw(dropdown.node().value, showImports, showExports)
     })
 
     draw("Wine", true, false)
 
     scrolly.addTrigger({num: 1, do: () => {
+      lastItem = "Wine";
       draw("Wine", true, false)
     }});
     
     scrolly.addTrigger({num: 2, do: () => {
+      lastItem = "Cheese, whole cow milk";
       draw("Cheese, whole cow milk", true, false)
     }});
     
     scrolly.addTrigger({num: 3, do: () => {
+      lastItem = "Bacon and ham";
       draw("Bacon and ham", true, false)
     }});
     
     scrolly.addTrigger({num: 4, do: () => {
+      lastItem = "Potatoes, frozen";
       draw("Potatoes, frozen", true, false)
-    }});
+    }}); 
 
     scrolly.addTrigger({num: 5, do: () => {
+      lastItem = "Tomatoes"
       draw("Tomatoes", true, false)
     }});
 
     scrolly.addTrigger({num: 6, do: () => {
-      draw("Beverages, distilled alcoholic", false, true)
+      lastItem = "Meat, sheep";
+      draw("Meat, sheep", false, true)
     }});
+
+    // scrolly.addTrigger({num: 6, do: () => {
+    //   draw("Chocolate products nes", false, true)
+    // }});
 
     scrolly.addTrigger({num: 7, do: () => {
-      draw("Chocolate products nes", false, true)
-    }});
-
-    scrolly.addTrigger({num: 8, do: () => {
       // draw("Total", true, true)
     }});
     
@@ -375,8 +416,12 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
 import * as chroma from "chroma-js"
 
 const drawTernary = () => {
-  const height = 860;
-const width = 860;
+
+
+const height = document.querySelector(".interactive-wrapper").clientWidth;
+const width = height;
+
+console.log(height);
 
 const svg = d3.select(".interactive-wrapper").append("div")
   .classed("svg-wrapper", true)
@@ -514,6 +559,7 @@ const positionLabel = ([x,y], labelPosition) => {
   let newX = x;
   let newY = y
   let textAnchor = "middle";
+  labelPosition = labelPosition || "right";
 
   if(labelPosition == "right") {
     newX = newX + 10;
@@ -523,7 +569,18 @@ const positionLabel = ([x,y], labelPosition) => {
 
   if(labelPosition == "top") {
     newX = newX;
-    newY = newY - 8
+    newY = newY - 12
+  }
+
+  if(labelPosition == "bottom") {
+    newX = newX;
+    newY = newY + 18
+  }
+
+  if(labelPosition == "left") {
+    newX = newX - 14;
+    newY = newY + 4
+    textAnchor = "end"
   }
 
   return [newX,newY, textAnchor]
@@ -544,7 +601,7 @@ const mouseenter = (d) => {
 }
 
 d3Fetch.csv("<%= path %>/assets/sorted_2.csv").then(data => {
-  const foodsToLabel = [{name: "Meat, chicken", position: "right"}, {name: "Mushrooms and truffles", position: "right", displayName:  "Mushrooms"}, {name: "Tomatoes", position: "right"}, {name: "Spinach", position: "right"}, {name: "Honey, natural", position: "right"}, {name: "Potatoes", position: "right"}, {name: "Chillies and peppers, green", displayName: "Chillies and peppers", position: "right"}];
+  const foodsToLabel = [{name: "Meat, chicken", position: "right"}, {name: "Mushrooms and truffles", position: "right", displayName:  "Mushrooms"}, {name: "Tomatoes", position: "right"}, {name: "Spinach", position: "right"}, {name: "Honey, natural", position: "right"}, {name: "Potatoes", position: "right"}, {name: "Chillies and peppers, green", displayName: "Chillies and peppers", position: "bottom", hideMobile: true},{name: "Beans, green", position: "top"}, {name:"Apples"}, {name:"Avocados", position: "left"}, {name:"Cucumbers and gherkins", displayName: "Cucumbers", position:"top"}];
   const cleanedData = data.map(d => ({
       name: d.I,
       color: colourise(d),
@@ -609,7 +666,7 @@ d3Fetch.csv("<%= path %>/assets/sorted_2.csv").then(data => {
               }) 
 
   chart.selectAll("text.circle-labels")
-    .data(cleanedData.filter(d => d.label))
+    .data(cleanedData.filter(d => d.label).filter(d => !(window.innerWidth < 500 && d.label.hideMobile)))
     .enter()
     .append("text")
       .attr("x", d => (d.label) ? positionLabel(d.pos, d.label.position)[0] : d.pos[0])
@@ -617,19 +674,23 @@ d3Fetch.csv("<%= path %>/assets/sorted_2.csv").then(data => {
       .style("font-size", "13")
       .style("fill", "#fff")
       .style("text-anchor", d => positionLabel(d.pos, d.label.position)[2])
-      .text(d => d.displayName || d.name)
+      .text(d => (d.label.displayName) ? d.label.displayName : d.name)
+
 
   const anno = [`Foods higher up the chart`, `are more reliant on`, `EU imports, and so are possibly`, `more at risk of disruption`, `in a no-deal Brexit`];
   
-  anno.forEach((n, i) => {
-    svg.append("text")
-      .classed("text-label-ternary", true)
-      .text(n)
-      .attr("x", 120)
-      .attr("y", 120 + (i*18))
-  });
+  if(window.innerWidth > 500) {
+    const leftMargin = (window.innerWidth > 1200) ? 120 : 0;
 
+    anno.forEach((n, i) => {
+      svg.append("text")
+        .classed("text-label-ternary", true)
+        .text(n)
+        .attr("x", leftMargin)
+        .attr("y", (leftMargin + 12) + (i*18))
+    });
 
+    }
 });
 }
 

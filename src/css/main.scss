@@ -11,10 +11,12 @@
 
 html, body {
     background-color: #161616;
+    
 }
 
 .element-atom,
 .interactive-atom {
+
     margin: 0 !important;
     
     // text {
@@ -72,6 +74,12 @@ html, body {
     background-color: #161616;
     border-top: 1px solid #333;
     border-bottom: 1px solid #333;
+    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
+
+    g {
+        transition: opacity 0.5s ease-in-out;
+    }
 }
 
 // svg path {
@@ -111,7 +119,20 @@ svg .animated-line--reverse {
     stroke: #333;
     paint-order: stroke;
     stroke-width: 2px;
+
+    @include mq($until: 500px) {
+        font-size: 10px !important;
+    }
     // text-transform: uppercase;
+}
+
+.bars-wrapper span {
+    @include fs-textSans(1);
+    display: block;
+    
+    &::after {
+        content: ' tonnes';
+    }
 }
 
 .country-name--number {
@@ -178,7 +199,7 @@ svg .animated-line--reverse {
     line-height: 20px;
     @include fs-headline(2);
     // font-weight: 900;
-    background-color: #dcdcdc;
+    background-color: #767676;
     border-radius: 0px;
     border: 0;
     height: 35px;
@@ -225,19 +246,23 @@ svg .animated-line--reverse {
 .interactive-wrapper {
     position: relative;
     background-color: #161616;
-    width: 860px;
+    width: 100%;
+    
     margin-bottom: 24px;
-    margin-left: -120px;
+    @include mq(wide) {
+        margin-left: -120px;
+        width: 860px;
+    }
     border-bottom: 1px solid #333;
 
 }
 
-.ternary-plot {
-    h2 {
-        @include fs-header(5);
-        margin-bottom: 6px;
-    }
-}
+// .ternary-plot {
+//     h2 {
+//         @include fs-header(5);
+//         margin-bottom: 6px;
+//     }
+// }
 
 
 .mouse-overlay {

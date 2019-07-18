@@ -12,63 +12,23 @@
                     <a href="{{url}}" data-link-name="in body link" class="u-underline"></a>
                 </figure>
             {{/graphic}}  
-            {{#slot}}
-            <div id="scrolly-1" class="weighting--full">
+            {{#scrolly}}
+                <div id="scrolly-1" class="weighting--full">
                     <div class="scroll-wrapper">
                         <div class="scroll-inner">
                             <svg id="data-viz"> 
                             </svg>
                         </div>
                         <div class="scroll-text">
-                            <div class="scroll-text__inner">
-                                <div class="scroll-text__div">
-                                    <h4 class="imports">Imports</h4>
-                                    <h3>Wine</h3>
-                                    <p>Wine is the UK’s biggest food import, totalling more than $xbn per year. With France firmly Britain’s biggest wine importer it’s no surprise that champagne manufacturers are concerned about an influx of ‘British champagne’ after Brexit, unless the UK signs up to protect the names of thousands of European products.</p>
+                            {{#boxes}}
+                                <div class="scroll-text__inner">
+                                    <div class="scroll-text__div"> 
+                                        <h4 class="exports">{{tag}}</h4>
+                                        <h3>{{title}}</h3> 
+                                        <p>{{{copy}}}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="scroll-text__inner">
-                                <div class="scroll-text__div"> 
-                                    <h4 class="imports">Imports</h4>
-                                    <h3>Cheese</h3>
-                                    <p>Mozzarella, brie, feta, halloumi and hundreds of other European cheeses may have become staples in British stores, but it’s Ireland that is the unlikely top exporter of cheese to the UK. More than $300m of Irish cheese comes into the UK each year.</p>
-                                </div>
-                            </div>
-                            <div class="scroll-text__inner">
-                                <div class="scroll-text__div">
-                                    <h4 class="imports">Imports</h4>
-                                    <h3>Bacon and ham</h3>
-                                    <p>Danish bacon exports may be on the <a href="https://pork.ahdb.org.uk/prices-stats/news/2014/december/danish-and-dutch-exports-expanding/">decline</a>, but it's still the top exporter of bacon and ham to the UK, closely followed by the Netherlands, Germany and Italy. </p>
-                                </div>
-                            </div>
-                            <div class="scroll-text__inner">
-                                <div class="scroll-text__div"> 
-                                    <h4 class="imports">Imports</h4>
-                                    <h3>Frozen potatoes</h3>
-                                    <p>Frozen potato products are the largest category of UK potato imports. 99% of those imports come from the EU, with the Netherlands and Belgium topping the list.</p>
-                                </div>
-                            </div>
-                            <div class="scroll-text__inner">
-                                <div class="scroll-text__div"> 
-                                    <h4 class="imports">Imports</h4>
-                                    <h3>Tomatoes</h3>
-                                    <p>Britain imports more than $xbn of fresh tomatoes every year. Many of them come from the Netherland’s super-efficient tomato greenhouses, which produce more tomatoes per square mile than any other country in the world.</p>
-                                </div>
-                            </div>
-                            <div class="scroll-text__inner">
-                                <div class="scroll-text__div">
-                                    <h4 class="exports">Exports</h4>
-                                    <h3>Distilled alcoholic beverages</h3> 
-                                    <p>Brexiteers insist Britain wouldn’t impose import tariffs on food coming from the EU in the event of a no-deal Brexit, but imports are only one side of the coin. The EU is the biggest market for thousands of British food exporters, and tariffs are an inevitability if Britain leaves without a deal. Britain’s top export is distilled alcoholic spirits – British gin and Scotch whisky, which makes up more than $2bn of EU exports every year.</p>
-                                </div>
-                            </div>
-                            <div class="scroll-text__inner">
-                                <div class="scroll-text__div"> 
-                                    <h4 class="exports">Exports</h4>
-                                    <h3>Chocolate products</h3> 
-                                    <p>Exports of British chocolate to the EU have continued to grow in recent years, with Ireland as the top destination.</p>
-                                </div>
-                            </div>
+                            {{/boxes}}
                             <div class="scroll-text__inner">
                                 <div class="scroll-text__div">
                                     <h3>What about everything else?</h3> 
@@ -79,22 +39,17 @@
                                     </div>  
                                 </div>
                             </div>
-                            <div class="scroll-text__inner">
-                                <!-- <div class="scroll-text__div">
-                                    <h3 style="color: #000;">What about everything else?</h3> 
-                                    <p>The Food and Agriculture Organisation collect trade data for more than 300 categories of food and drink. Explore the EU imports and exports for your weekly shop: </p> 
-                                    <div class="dropdown">
-                                        <div class="dropdown-1"></div>
-                                        <div class="dropdown-2"></div>
-                                    </div>  
-                                </div> -->
+                            <div class="scroll-text__inner"> 
                             </div>
-                        </div>
-                    </div>
+                        </div> 
+                    </div> 
                 </div>
+                {{/scrolly}} 
+                {{#ternary}}
                 <div class="ternary-plot">
-                    <h2>Almost all of the spinach, chillies and tomatoes consumed in the UK are imported from the EU</h2>
-                    <p>Leo integer malesuada nunc vel risus commodo. Lacus viverra vitae congue eu. Mauris ultrices eros in cursus turpis massa tincidunt dui ut. Aliquam vestibulum morbi blandit cursus risus at ultrices mi tempus. Enim nec dui nunc mattis enim. Feugiat nisl pretium fusce id velit. Purus semper eget duis at tellus at urna.</p>
+                    {{#text}}
+                        <p>{{{.}}}</p>
+                    {{/text}}
                     <div class="interactive-wrapper">
                         <div class="mouse-overlay" style="display: none;">
                             <div class="bars-wrapper">
@@ -103,7 +58,7 @@
                         </div>
                     </div>
                 </div>
-            {{/slot}}
+                {{/ternary}}
             
         {{/body.blocks}}
     </div>

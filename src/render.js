@@ -9,11 +9,11 @@ const clean = async(immersiveData) => {
     const relatedContent = await rp({uri: `https://api.nextgen.guardianapps.co.uk/related/${relatedContentLink}.json?exclude-tag=tone/advertisement-features&exclude-tag=guardian-professional/guardian-professional`, json: true});
 
     const cleanedBlocks = immersiveData.body.blocks.map(b => {
-        if(b.type === "copy") {
+        if(b.text) {
             b.text = b.text.split("\r\n\r\n\r\n");
         } 
-        b[b.type] = true;
-        return b;
+        b[b.type] = true; 
+        return b; 
     }); 
 
     immersiveData.body.blocks = cleanedBlocks;
@@ -29,4 +29,4 @@ export async function render() {
     const data = await clean(await rp({uri: "https://interactive.guim.co.uk/docsdata-test/1o4Z7PNCEIIjKDs4JdVzoVOl5TksTg8rJYChNh7MJOIc.json", json: true}));
     
     return Mustache.render(immersiveHTML, data, {"header": immersiveHeaderHTML});
-}     
+}      

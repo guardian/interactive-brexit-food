@@ -60,6 +60,12 @@
             left: 250px;
         }
     }
+
+    h2 {
+        @include fs-header(5);
+        margin-bottom: 6px;
+        margin-top: 24px;
+    }
 }
 
 .i-main {
