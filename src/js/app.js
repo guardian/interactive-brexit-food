@@ -170,8 +170,8 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
       const toMapImports = imports.filter(d => d.Item === item);
       const toMapExports = exports.filter(d => d.Item === item); 
 
-      // const countriesToLabelImports = toMapImports.slice().sort((a,b) => Number(b.Value) - Number(a.Value)).map(d => d["Partner Countries"]).slice(0, 5);
-      // const countriesToLabelExports = toMapImports.slice().sort((a,b) => Number(b.Value) - Number(a.Value)).map(d => d["Partner Countries"]).slice(0, 5);
+      const countriesToLabelImports = toMapImports.slice().sort((a,b) => Number(b.Value) - Number(a.Value)).map(d => d.Value)[3];
+      const countriesToLabelExports = toMapExports.slice().sort((a,b) => Number(b.Value) - Number(a.Value)).map(d => d.Value)[3];
 
       fc.features.forEach(f => {
           if(euCountries.filter(c => c === f.name).length > 0) {
@@ -253,14 +253,15 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                       .text((isMobile) ? geoff.nameToAlpha3(f.name) : f.name)
                       .classed("country-name", true)
                       // .style("font-weight", "bold")
-                     
-                  if(showImports && datumImports && !isMobile) {
+                    
+                  const mobileModifier = isMobile ? -4 : 0
+                  if(showImports && datumImports && (!isMobile || Number(datumImports.Value) > Number(countriesToLabelImports))) {
                         // .style("font-size", "14px")
 
                     const label2 = layer3.append("text")
                         .style("text-anchor", "middle")
                         .attr("x", start[0])
-                        .attr("y", start[1] + 30)
+                        .attr("y", start[1] + 30 + mobileModifier)
                         .text(`$${numeral(Number(datumImports.Value)*1000).format("0a")}`) 
                         .classed("country-name", true)
                         // .style("fill", "#767676") 
@@ -269,13 +270,13 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                   }
                   // }
 
-                  if(showExports && datumExports && !isMobile) {
+                  if(showExports && datumExports && (!isMobile || Number(datumExports.Value) > Number(countriesToLabelExports))) {
                     // .style("font-size", "14px")
 
                     const label2 = layer3.append("text")
                         .style("text-anchor", "middle")
                         .attr("x", start[0])
-                        .attr("y", (showImports && datumImports) ? start[1] + 42 : start[1] + 30)
+                        .attr("y", (showImports && datumImports) ? start[1] + 42 : start[1] + 30 + mobileModifier)
                         .text(`$${numeral(Number(datumExports.Value)*1000).format("0a")}`) 
                         .classed("country-name", true)
                         // .style("fill", "#767676")  
@@ -358,7 +359,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
       draw(dropdown.node().value, showImports, showExports)
     })
 
-    draw("Wine", true, false)
+    draw("Wine", true, false);
 
     scrolly.addTrigger({num: 1, do: () => {
       lastItem = "Wine";
