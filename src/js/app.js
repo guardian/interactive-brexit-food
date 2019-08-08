@@ -1,6 +1,20 @@
-import * as d3 from "d3"
 import * as d3Fetch from "d3-fetch"
 import * as d3Projections from "d3-geo-projection"
+
+import * as d3Array from "d3-array"
+import * as d3Select from "d3-selection"
+import * as d3Scale from "d3-scale"
+import * as d3Shape from "d3-shape"
+import * as d3Format from "d3-format"
+import * as d3G from "d3-geo"
+import {
+    event as d3event
+} from "d3-selection"
+import * as d3Collection from "d3-collection"
+
+const d3 = Object.assign({}, d3Array,d3Collection, d3Select, d3Scale, d3Shape, d3Format, d3G);
+
+
 import world from 'world-atlas/world/50m.json' 
 import * as topojson from 'topojson'
 import geoff from './geoff'
@@ -327,7 +341,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
     const listOfItems = (d3.nest().key(d => d.Item).entries(imports)).map(d => d.key);
 
     dropdown.selectAll("option")
-        .data(listOfItems.filter(n => n !== "Total").sort((a,b) => a > b))
+        .data(listOfItems.filter(n => n !== "Total").sort())
           .enter()
           .append("option")
           .text(d => d)
