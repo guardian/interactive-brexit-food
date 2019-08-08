@@ -123,10 +123,13 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
     const ukCentroid = centroids.find(b => b.name === "United Kingdom");
     const ukCentroidProjected = proj([Number(ukCentroid.longitude), Number(ukCentroid.latitude)]);
 
-    const imports = data[1].filter(d => d.Element === "Import Value").filter(d => d.Value != "0")
-    const exports = data[1].filter(d => d.Element === "Export Value").filter(d => d.Value != "0")
+    const dataMod = data[1].map(d => {
+      d["Value"] = d["Value"]/1.2399
+      return d;
+    })
 
-
+    const imports = dataMod.filter(d => d.Element === "Import Value").filter(d => d.Value != "0")
+    const exports = dataMod.filter(d => d.Element === "Export Value").filter(d => d.Value != "0")
 
     const liner = d3.line()
         .x(d => d[0])
@@ -136,7 +139,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
 
     const maxR = Math.min(40*(width/1300), 40);
 
-    const rScale = d3.scaleSqrt().domain(d3.extent(data[1].filter(d => d.Value != "0").filter(d => d.Item !== "Total"), d => Number(d.Value))).range([0.5, maxR])
+    const rScale = d3.scaleSqrt().domain(d3.extent(dataMod.filter(d => d.Value != "0").filter(d => d.Item !== "Total"), d => Number(d.Value))).range([0.5, maxR])
     // .clamp(true);
 
     const animationDuration = 1000; 
@@ -262,7 +265,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                         .style("text-anchor", "middle")
                         .attr("x", start[0])
                         .attr("y", start[1] + 30 + mobileModifier)
-                        .text(`$${numeral(Number(datumImports.Value)*1000).format("0a")}`) 
+                        .text(`£${numeral(Number(datumImports.Value)*1000).format("0a")}`) 
                         .classed("country-name", true)
                         // .style("fill", "#767676") 
                         .classed("country-name--number", true)
@@ -277,7 +280,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
                         .style("text-anchor", "middle")
                         .attr("x", start[0])
                         .attr("y", (showImports && datumImports) ? start[1] + 42 : start[1] + 30 + mobileModifier)
-                        .text(`$${numeral(Number(datumExports.Value)*1000).format("0a")}`) 
+                        .text(`£${numeral(Number(datumExports.Value)*1000).format("0a")}`) 
                         .classed("country-name", true)
                         // .style("fill", "#767676")  
                         .classed("country-name--number", true)
