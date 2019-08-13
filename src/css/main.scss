@@ -33,8 +33,11 @@ html, body {
         transform: rotate(45deg) translateX(-15px);
     }
 
-    svg {
+}
+#data-viz {
         overflow: visible;
+        position: absolute;
+        top: 0;
         circle {
             transition: fill-opacity 0.33s ease-in-out;
             // filter:url('#goo');
@@ -45,9 +48,7 @@ html, body {
 
         // border-top: 1px solid #767676;
         // border-bottom: 1px solid #767676;
-    }
 }
-
 .dropdown {
     // position: absolute;
     // top: 72px;
@@ -70,8 +71,12 @@ html, body {
     margin-bottom: 2px;
 }
 
-#data-viz {
+canvas {
     background-color: #161616;
+}
+
+#data-viz {
+    // background-color: #161616;
     border-top: 1px solid #333;
     border-bottom: 1px solid #333;
     -webkit-transform: translate3d(0,0,0);
@@ -199,8 +204,8 @@ svg .animated-line--reverse {
     line-height: 20px;
     @include fs-headline(2);
     // font-weight: 900;
-    background-color: #767676;
-    border-radius: 0px;
+    background-color: #dcdcdc;
+    border-radius: 0px; 
     border: 0;
     height: 35px;
     outline: 0;
@@ -240,7 +245,17 @@ svg .animated-line--reverse {
     stroke: #333;
     // fill: #fff !important;
     paint-order: stroke;
+
+    @include mq($until: 500px) {
+        font-size: 11px;
+    }
     
+}
+
+.note-label {
+    @include fs-textSans(3);
+color: #767676;
+margin-bottom: 6px;
 }
 
 .interactive-wrapper {
@@ -346,4 +361,23 @@ svg .animated-line--reverse {
     @include fs-textSans(3); 
     font-size: 14px !important;
     fill: #fff;
+}
+
+.svg-wrapper div {
+    color: #fff;
+    @include fs-textSans(3);
+    position: absolute;
+    font-weight: bold;
+    top: -24px;
+}
+
+.i-wrapper figure {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.ios, .android {
+    .i-related-content {
+        display: none;
+    }
 }

@@ -123,7 +123,7 @@
 
 .scroll-text__inner {
     box-sizing: border-box;
-    height: 400px;
+    height: 400px; 
  
     @include mq(tablet) {
         height: 100vh;

@@ -6,7 +6,7 @@ import rp from "request-promise"
 
 const clean = async(immersiveData) => {
     const relatedContentLink = immersiveData.header.url.replace(/^(?:https:\/\/(www.)theguardian.com)/g, "")
-    const relatedContent = await rp({uri: `https://api.nextgen.guardianapps.co.uk/related/${relatedContentLink}.json?exclude-tag=tone/advertisement-features&exclude-tag=guardian-professional/guardian-professional`, json: true});
+    const relatedContent = await rp({uri: `https://api.nextgen.guardianapps.co.uk/series/politics/eu-referendum.json?exclude-tag=tone/minutebyminute`, json: true});
 
     const cleanedBlocks = immersiveData.body.blocks.map(b => {
         if(b.text) {

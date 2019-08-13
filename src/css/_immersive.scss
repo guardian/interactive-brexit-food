@@ -61,10 +61,14 @@
         }
     }
 
-    h2 {
-        @include fs-header(5);
-        margin-bottom: 6px;
-        margin-top: 24px;
+    i a {
+        color: #fff;
+        text-decoration: underline;
+    }
+
+    .scroll-text__div a {
+        color: #c70000;
+        // text-decoration: underline;
     }
 }
 
@@ -83,6 +87,12 @@
 
     @include mq(wide) {
         margin-left: 240px;
+    }
+
+    h2 {
+        @include fs-header(5);
+        margin-bottom: 6px;
+        margin-top: 24px;
     }
 }
 

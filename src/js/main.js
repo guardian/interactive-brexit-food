@@ -1,3 +1,4 @@
+
 var el = document.createElement('script');
 
 el.src = '<%= path %>/app.js';

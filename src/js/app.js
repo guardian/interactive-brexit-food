@@ -1,3 +1,10 @@
+import Promise from 'promise-polyfill'; 
+if (!window.Promise) {
+  window.Promise = Promise;
+}
+
+import fetch from 'unfetch'
+
 import * as d3Fetch from "d3-fetch"
 import * as d3Projections from "d3-geo-projection"
 
@@ -14,13 +21,14 @@ import * as d3Collection from "d3-collection"
 
 const d3 = Object.assign({}, d3Array,d3Collection, d3Select, d3Scale, d3Shape, d3Format, d3G);
 
-
-import world from 'world-atlas/world/50m.json' 
+import world from '../assets/countries_simp.json' 
 import * as topojson from 'topojson'
 import geoff from './geoff'
 import palette from "./palette"
 import ScrollyTeller from "./scrollyteller"
 import numeral from "numeral"
+
+
 console.log(document.querySelector("#scrolly-1"))
 const scrolly = new ScrollyTeller({
   parent: document.querySelector("#scrolly-1"),
@@ -29,9 +37,9 @@ const scrolly = new ScrollyTeller({
   transparentUntilActive: true
 }); 
 
-const fc = topojson.feature(world, world.objects.countries) // I always call it 'fc' for 'FeatureCollection'
+const fc = topojson.feature(world, world.objects["countries_simp"]) // I always call it 'fc' for 'FeatureCollection'
 
-const euCountries = ["United Kingdom", "Spain", "France", "Germany", "Poland", "Austria", "Portugal", "Luxembourg", "Italy", "Denmark", "Netherlands", "Belgium", "Czechia", "Croatia", "Cyprus", "Romania", "Bulgaria", "Estonia", "Latvia", "Ireland", "Hungary", "Greece", "Slovakia", "Slovenia", "Sweden"];
+const euCountries = ["United Kingdom", "Spain", "France", "Germany", "Poland", "Austria", "Portugal", "Luxembourg", "Italy", "Denmark", "Netherlands", "Belgium", "Czechia", "Croatia", "Cyprus", "Romania", "Bulgaria", "Estonia", "Latvia", "Ireland", "Hungary", "Greece", "Slovakia", "Slovenia", "Sweden", "Finland", "Malta", "Lithuania"];
 
 const width = document.body.clientWidth;
 const height = window.innerHeight;
@@ -40,12 +48,11 @@ const margin = document.querySelector("#scrolly-1").getBoundingClientRect().left
 
 document.querySelector("#scrolly-1").style.marginLeft = -margin + "px"
 
-const mapped = fc.features.map(f => {
-    return Object.assign({}, f, {name: geoff.alpha3ToName(geoff.numericToAlpha3(f.id))})
+fc.features = fc.features.map(f => {
+  return Object.assign({}, f, {name: geoff.alpha3ToName(geoff.numericToAlpha3(f.properties.ISO_N3))})
 });
 
-fc.features = mapped;
-
+console.log(fc.features); 
 const bbox = {
   "type": "FeatureCollection",
   "features": [
@@ -57,24 +64,24 @@ const bbox = {
         "coordinates": [
           [
             [
-              -10.986328125,
-              34.30714385628804
+              -10.546875,
+              34.23451236236987
             ],
             [
-              34.892578125,
-              34.30714385628804
+              35.68359375,
+              34.23451236236987
             ],
             [
-              34.892578125,
-              59.31076795603884
+              35.68359375,
+              61.938950426660604
             ],
             [
-              -10.986328125,
-              59.31076795603884
+              -10.546875,
+              61.938950426660604
             ],
             [
-              -10.986328125,
-              34.30714385628804
+              -10.546875,
+              34.23451236236987
             ]
           ].reverse()
         ]
@@ -83,16 +90,23 @@ const bbox = {
   ]
 };
 
-const isMobile = (window.innerWidth < 600 && window.innerHeight > window.innerWidth);
-
+const isMobile = (document.body.clientWidth < 600);
 const offset = (width > 900) ? 240 : 0;
+
+const scale = window.devicePixelRatio;
+const cHeight = scale * height;
+const cWidth = scale * width;
+
+const canvas = d3.select(".scroll-inner canvas").attr("height", (isMobile) ? cHeight/2 : cHeight).attr("width", cWidth - (scale*offset)).style("transform", "translateX(" + offset + "px)").style("width", (width - offset) + "px").style("height", ((isMobile) ? height/2 : height) + "px");
+
+const projCanvas = d3Projections.geoBonne()
+  .fitSize([cWidth - (offset * scale), (isMobile) ? cHeight/2 : cHeight], bbox)
 
 const proj = d3Projections.geoBonne()
   .fitSize([width - offset, (isMobile) ? height/2 : height], bbox)
 
-const path = d3.geoPath()
+  const path = d3.geoPath()
   .projection(proj)
-
 
 const svg = d3.select("#data-viz")
     .attr("height", (isMobile) ? height/2 : height)
@@ -101,27 +115,28 @@ const svg = d3.select("#data-viz")
     .append("g")
     .style("transform", "translateX(" + offset + "px)");
 
-const countryShapes = svg
-    .selectAll('blah')
-    .data(fc.features)
-    .enter()
-    .append('path')
-    .attr('d', path)
-    .attr("id", d => d.name)
-    .style("fill", d => {
-        if(euCountries.filter(f => f === d.name).length > 0) {
-            return "#333";
-        } else {
-            return "#161616"
-        }
-    })
-    .style("stroke", d => {
-        if(euCountries.filter(f => f === d.name).length > 0) {
-            return "#161616";
-        } else {
-            return "#333"
-        }
-    })
+const context = canvas.node().getContext("2d");
+const pathC = d3.geoPath(null, context).projection(projCanvas);
+context.lineJoin = "round";
+context.lineCap = "round";
+
+fc.features.forEach(f => {
+  context.beginPath();
+  pathC(f);
+  context.lineWidth = 1*scale;
+
+  if(euCountries.filter(e => e === f.name).length > 0) {
+    context.fillStyle = "#333";
+    context.strokeStyle = "#161616";
+  } else {
+    context.fillStyle = "#161616";
+    context.strokeStyle = "#333";
+  }
+
+  context.fill();
+  context.stroke();
+});
+
 
 const dataviz1 = svg.append("g")
 const dataviz2 = svg.append("g")
@@ -141,6 +156,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
       d["Value"] = d["Value"]/1.2399
       return d;
     })
+    .filter(d => d["Value"] > 1)
 
     const imports = dataMod.filter(d => d.Element === "Import Value").filter(d => d.Value != "0")
     const exports = dataMod.filter(d => d.Element === "Export Value").filter(d => d.Value != "0")
@@ -341,7 +357,7 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
     const listOfItems = (d3.nest().key(d => d.Item).entries(imports)).map(d => d.key);
 
     dropdown.selectAll("option")
-        .data(listOfItems.filter(n => n !== "Total").sort())
+        .data(listOfItems.filter(n => n !== "Total").filter(d => d !== "Mat�").sort())
           .enter()
           .append("option")
           .text(d => d)
@@ -431,8 +447,6 @@ Promise.all([d3Fetch.json("https://interactive.guim.co.uk/docsdata-test/1kO5_S91
     scrolly.watchScroll();
 });
 
-import * as chroma from "chroma-js"
-
 const drawTernary = () => {
 
 
@@ -461,6 +475,8 @@ function line([x1, y1], [x2, y2]) {
 const chart = svg.append('g')
     .attr("transform", `translate(${width / 2} ${height / 2})`)
     .attr("font-family", "sans-serif");
+
+d3.select(".interactive-wrapper").append("div").text(`Note: percentages are based on tonnes of imports`).classed("note-label", true);
 
 const size = Math.min(width, height) / 2;
 const yOffset = (size - Math.sin(30 * Math.PI / 180) * size) / 2;
@@ -533,6 +549,8 @@ chart.append("g")
 //         .attr("dy", ".3em")
 //     .text(d => d.tick);
 
+const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
 // label
 chart.append("g")
     .attr("font-size", 14)
@@ -550,7 +568,7 @@ chart.append("g")
         .attr("text-anchor",d => d["text-anchor"])
         .style("font-weight", "bold")
         .style("fill", d => d.color)
-        .text(d => d.label)
+        .text(d => (isMobile) ? (width < 360) ? d.label.replace(/◀/g, "<").replace(/▶/g, ">").replace(/Imported more/g, "More") : d.label.replace(/◀/g, "<").replace(/▶/g, ">") : (width < 500 ? d.label.replace(/Imported more/g, "More") : d.label ))
 
 // data  
 
@@ -695,7 +713,8 @@ d3Fetch.csv("<%= path %>/assets/sorted_2.csv").then(data => {
       .text(d => (d.label.displayName) ? d.label.displayName : d.name)
 
 
-  const anno = [`Foods higher up the chart`, `are more reliant on`, `EU imports, and so are possibly`, `more at risk of disruption`, `in a no-deal Brexit`];
+  // const anno = [`Foods higher up the chart`, `are more reliant on`, `EU imports, and so are possibly`, `more at risk of disruption`, `in a no-deal Brexit`];
+  const anno = ["Foods higher up the chart","are more at risk of","disruption or price increases","after a no-deal Brexit"];
   
   if(window.innerWidth > 500) {
     const leftMargin = (window.innerWidth > 1200) ? 120 : 0;
@@ -708,6 +727,11 @@ d3Fetch.csv("<%= path %>/assets/sorted_2.csv").then(data => {
         .attr("y", (leftMargin + 12) + (i*18))
     });
 
+    } else {
+      d3.select(".svg-wrapper").style("margin-top", "48px");
+      const div = d3.select(".svg-wrapper").insert("div",":first-child");
+
+      div.html(`Foods higher up the chart are more at risk of disruption or price increases after a no-deal Brexit`);
     }
 });
 }
